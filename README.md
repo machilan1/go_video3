@@ -33,18 +33,25 @@ Developing
 
 2. Tailwind CSS has to recompile every time you change the templates.
 
+    Open a new terminal and run
+
     $ make tailwindcss-watch 
 
-    and the tailwindcss CLI will monitor the changes and recompile automatically.
+    and the tailwindcss CLI will monitor the changes and recompile stylesheets automatically.
 
 
-3. If you want to feel even better , you can use Air if you want to utilize hot reloading.
+3. If you want to feel even better , you can use Air for hot reloading.
     
-    Instal air by the instructions in the url below
+    Install air by the instructions in the url below
     
     https://github.com/air-verse/air
 
     There is a .air.toml in project root and you can utilize the setting.
 
+    Run
+
+    $ air
+
+    to serve the app with hot reloading.
 
     
