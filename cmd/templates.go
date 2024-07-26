@@ -18,7 +18,7 @@ type templateData struct {
 	CanUpdate       bool
 	IsAdmin         bool
 	CourseCards     []courseCardVM
-	ChaptorCards    []chaptorCardsVM
+	ChapterCards    []chapterCardsVM
 	UserCards       []userCardVM
 	Course          CourseVM
 	Chapter         ChapterVM
@@ -74,11 +74,14 @@ type courseCardVM struct {
 	store.Course
 }
 
-type chaptorCardsVM struct {
+// TODO make sure you need this or not
+type chapterCardsVM struct {
 	title  string
 	length int
 	order  int
 }
+
+// TODO make sure you need this or not
 type userCardVM struct {
 	email     string
 	name      string

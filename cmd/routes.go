@@ -42,10 +42,8 @@ func (app *application) routes() http.Handler {
 
 	mux.Handle("GET /users/{userID}/courses/{courseID}/chapters/{chapterID}/edit", updater.ThenFunc(app.viewEditCourseChapter))
 	mux.Handle("PATCH /users/{userID}/courses/{courseID}/chapters/{chapterID}", updater.ThenFunc(app.editChapter))
+	// Todo : delete course undeveloped.
 	mux.Handle("DELETE /users/{userID}/courses/{courseID}", updater.ThenFunc(app.deleteCourse))
-
-	// mux.Handle("POST /course",updater.ThenFunc(app.createCourse))
-	// mux.Handle("PATCH /course/{courseID}")
 
 	// mux.HandleFunc("DELETE /user/{userId}", app.userDeactivate)
 

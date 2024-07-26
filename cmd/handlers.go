@@ -36,31 +36,6 @@ type updateChapterForm struct {
 
 func (app *application) viewHome(w http.ResponseWriter, r *http.Request) {
 
-	// err := r.ParseForm()
-	// if err != nil {
-	// 	app.clientError(w,http.StatusBadRequest)
-	// }
-
-	// f, h, err := r.FormFile("file")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	app.clientError(w, http.StatusBadRequest)
-	// 	return
-	// }
-	// defer f.Close()
-
-	// bs, err := io.ReadAll(f)
-	// if err != nil {
-	// 	app.serverError(w, r, err)
-	// 	return
-	// }
-
-	// err = os.WriteFile("statics/videos/"+h.Filename, bs, 0644)
-	// if err != nil {
-	// 	app.serverError(w, r, err)
-	// 	return
-	// }
-
 	// fetch courses
 	param := store.FindCoursesParams{Page: 1, Limit: 20}
 	courses, err := app.store.CourseStore.FindMany(param)
@@ -312,6 +287,8 @@ func (app *application) editChapter(w http.ResponseWriter, r *http.Request) {
 	}
 
 	chapNum, err := strconv.Atoi(r.FormValue("chapNum"))
+
+	// TODO : finish validations
 	// if err != nil {
 	// 	app.clientError(w, http.StatusBadRequest)
 	// }

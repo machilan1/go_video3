@@ -13,13 +13,9 @@ type CustomSessionManager struct {
 }
 
 func NewCustomSessionManager() *CustomSessionManager {
-
 	manager := scs.New()
-
 	myManager := &CustomSessionManager{manager}
-
 	return myManager
-
 }
 
 func (sm *CustomSessionManager) PutStruct(c context.Context, key string, data any) error {

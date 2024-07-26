@@ -6,6 +6,8 @@ type VideoStore struct {
 	*sqlx.DB
 }
 
+// TODO Haven't finished
+
 func newVideoStore(DB *sqlx.DB) *VideoStore {
 	return &VideoStore{
 		DB,
