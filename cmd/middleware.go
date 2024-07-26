@@ -49,6 +49,7 @@ func (app *application) changeMethod(next http.Handler) http.Handler {
 	})
 }
 
+// TODO : Use this in admin UIs
 func (app *application) requireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !app.sessionManager.GetBool(r.Context(), "isAdmin") {

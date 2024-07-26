@@ -52,7 +52,7 @@ func main() {
 	}
 	defer db.Close()
 
-	templateCache, err := newTamplateCache()
+	templateCache, err := newTemplateCache()
 
 	if err != nil {
 		panic("Failed to initialize template caches")

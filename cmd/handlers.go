@@ -240,6 +240,8 @@ func (app *application) viewEditCourseChapter(w http.ResponseWriter, r *http.Req
 
 func (app *application) editCourse(w http.ResponseWriter, r *http.Request) {
 
+	// TODO : Finish Validation
+
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
@@ -315,7 +317,6 @@ func (app *application) editChapter(w http.ResponseWriter, r *http.Request) {
 	title := r.FormValue("title")
 	description := r.FormValue("description")
 	fileName := r.FormValue("fileName")
-	// validation
 
 	chapter, err := app.store.ChapterStore.FindOneChapter(chapterID)
 	if err != nil {
@@ -344,6 +345,7 @@ func (app *application) editChapter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) deleteCourse(w http.ResponseWriter, r *http.Request) {
+	// TODO : Pending development
 
 	fmt.Println(r.Method)
 	fmt.Println("CourseDelete")
@@ -497,7 +499,7 @@ func (app *application) upload(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (app *application) userlogout(w http.ResponseWriter, r *http.Request) {
+func (app *application) userLogout(w http.ResponseWriter, r *http.Request) {
 
 	err := app.sessionManager.RenewToken(r.Context())
 	if err != nil {

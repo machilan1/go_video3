@@ -15,6 +15,7 @@ func (app *application) routes() http.Handler {
 	dynamic := alice.New(app.sessionManager.LoadAndSave)
 	protected := dynamic.Append(app.requireAuthentication)
 	updater := protected.Append(app.requireUpdater, app.requireAuthor)
+	// TODO : Reserved for admin UI
 	// admin := protected.Append(app.requireAdmin)
 
 	mux.Handle("GET /statics/", http.StripPrefix("/statics", fileServer))
@@ -26,7 +27,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("POST /user/login", dynamic.ThenFunc(app.login))
 	mux.Handle("POST /user/signup", dynamic.ThenFunc(app.signUp))
 	//Protected
-	mux.Handle("POST /user/logout", protected.ThenFunc(app.userlogout))
+	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogout))
 	mux.Handle("POST /files/upload", protected.ThenFunc(app.upload))
 	mux.Handle("GET /{$}", protected.ThenFunc(app.viewHome))
 	mux.Handle("POST /{$}", protected.ThenFunc(app.viewHome))
@@ -34,6 +35,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /courses/{courseID}/chapters/{chapterID}", protected.ThenFunc(app.viewChapter))
 
 	mux.Handle("GET /users/{userID}/courses", updater.ThenFunc(app.viewUserCourse))
+	// TODO : Create course undeveloped.
 	// mux.Handle("GET /users/{userID}/create-course", updater.ThenFunc(app.viewCreateUserCourse))
 	// mux.Handle("POST /users/{userID}/courses", updater.ThenFunc(app.createUserCourse))
 	mux.Handle("GET /users/{userID}/courses/{courseID}", updater.ThenFunc(app.viewUserCourseDetail))
@@ -42,7 +44,7 @@ func (app *application) routes() http.Handler {
 
 	mux.Handle("GET /users/{userID}/courses/{courseID}/chapters/{chapterID}/edit", updater.ThenFunc(app.viewEditCourseChapter))
 	mux.Handle("PATCH /users/{userID}/courses/{courseID}/chapters/{chapterID}", updater.ThenFunc(app.editChapter))
-	// Todo : delete course undeveloped.
+	// TODO : delete course undeveloped.
 	mux.Handle("DELETE /users/{userID}/courses/{courseID}", updater.ThenFunc(app.deleteCourse))
 
 	// mux.HandleFunc("DELETE /user/{userId}", app.userDeactivate)

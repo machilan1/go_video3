@@ -36,7 +36,7 @@ func (app *application) newTemplateData(r *http.Request) templateData {
 	}
 }
 
-func newTamplateCache() (map[string]*template.Template, error) {
+func newTemplateCache() (map[string]*template.Template, error) {
 
 	cache := map[string]*template.Template{}
 
