@@ -1,0 +1,54 @@
+package main
+
+import (
+	"net/http"
+
+	"github.com/gotailwindcss/tailwind/twembed"
+	"github.com/gotailwindcss/tailwind/twhandler"
+	"github.com/justinas/alice"
+)
+
+func (app *application) routes() http.Handler {
+	mux := http.NewServeMux()
+	fileServer := http.FileServer(http.Dir("./statics/"))
+
+	dynamic := alice.New(app.sessionManager.LoadAndSave)
+	protected := dynamic.Append(app.requireAuthentication)
+	updater := protected.Append(app.requireUpdater, app.requireAuthor)
+	// admin := protected.Append(app.requireAdmin)
+
+	mux.Handle("GET /statics/", http.StripPrefix("/statics", fileServer))
+	mux.Handle("GET /css/", twhandler.New(http.Dir("statics/ui"), "/css", twembed.New()))
+
+	// Publics
+	mux.Handle("GET /user/login", dynamic.ThenFunc(app.viewLogin))
+	mux.Handle("GET /user/signup", dynamic.ThenFunc(app.viewSignUp))
+	mux.Handle("POST /user/login", dynamic.ThenFunc(app.login))
+	mux.Handle("POST /user/signup", dynamic.ThenFunc(app.signUp))
+	//Protected
+	mux.Handle("POST /user/logout", protected.ThenFunc(app.userlogout))
+	mux.Handle("POST /files/upload", protected.ThenFunc(app.upload))
+	mux.Handle("GET /{$}", protected.ThenFunc(app.viewHome))
+	mux.Handle("POST /{$}", protected.ThenFunc(app.viewHome))
+	mux.Handle("GET /courses/{ID}", protected.ThenFunc(app.viewCourse))
+	mux.Handle("GET /courses/{courseID}/chapters/{chapterID}", protected.ThenFunc(app.viewChapter))
+
+	mux.Handle("GET /users/{userID}/courses", updater.ThenFunc(app.viewUserCourse))
+	// mux.Handle("GET /users/{userID}/create-course", updater.ThenFunc(app.viewCreateUserCourse))
+	// mux.Handle("POST /users/{userID}/courses", updater.ThenFunc(app.createUserCourse))
+	mux.Handle("GET /users/{userID}/courses/{courseID}", updater.ThenFunc(app.viewUserCourseDetail))
+	mux.Handle("GET /users/{userID}/courses/{courseID}/edit", updater.ThenFunc(app.viewEditUserCourse))
+	mux.Handle("PATCH /users/{userID}/courses/{courseID}", updater.ThenFunc(app.editCourse))
+
+	mux.Handle("GET /users/{userID}/courses/{courseID}/chapters/{chapterID}/edit", updater.ThenFunc(app.viewEditCourseChapter))
+	mux.Handle("PATCH /users/{userID}/courses/{courseID}/chapters/{chapterID}", updater.ThenFunc(app.editChapter))
+	mux.Handle("DELETE /users/{userID}/courses/{courseID}", updater.ThenFunc(app.deleteCourse))
+
+	// mux.Handle("POST /course",updater.ThenFunc(app.createCourse))
+	// mux.Handle("PATCH /course/{courseID}")
+
+	// mux.HandleFunc("DELETE /user/{userId}", app.userDeactivate)
+
+	standardMiddlewares := alice.New(app.changeMethod)
+	return standardMiddlewares.Then(mux)
+}

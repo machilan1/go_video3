@@ -1,0 +1,80 @@
+{{define "nav"}}
+<div class="px-4 mb-10 border-b-2 border-black flex justify-between items-center h-20">
+    <a class="text-4xl" href="/">
+        瑪雅資訊雲端平台
+    </a>
+    <div>
+        <ul class="flex gap-4">
+            {{if .IsAuthenticated}}
+            <li>
+                <form action="/user/logout" method="post">
+                    <button  class="text-2xl" >
+                        登出
+                    </button>
+                </form>
+            </li>
+            {{end}}
+        </ul>
+    </div>
+</div>
+{{end}}
+
+{{define "main"}}
+<div>
+    {{$course := .Course}}
+    {{$userID := .UserID}}
+
+    <div class="w-full px-40 flex flex-col gap-4">
+        <div>
+            <a href="/users/{{.UserID}}/courses">👈返回我的課程列表</a>
+        </div>
+        <div class="flex flex-col gap-2">
+            <h2 class="text-4xl">課程資訊</h2>
+            <div class="w-full rounded-xl min-h-20 border-2 border-black p-4 relative">
+                <a href="/users/{{.UserID}}/courses/{{.Course.ID}}/edit">
+                    <button class="absolute right-4 top-4">編輯</button>
+                </a>
+                <h3 class="text-3xl">{{.Course.Title}}</h3>
+                <div class="text-2xl">{{.Course.Instructor}}</div>
+                <div class="flex gap-2 mt-2">
+                    {{range .Course.Tags}}
+                    <div class="rounded-full border-2 px-6 border-black">{{.Label}}</div>
+                    {{end}}
+                </div>
+                <div class="mt-2">{{.Course.Description}}</div>
+            </div>
+        </div>
+        <div class="flex flex-col gap-2">
+            <h2 class="text-4xl">章節列表</h2>
+            <div class="w-full rounded-xl min-h-20 border-2 border-black overflow-hidden ">
+                <ul>
+                    {{range .Course.Chapters}}
+                    <li>
+                        <div class="border-2 border-gray-400 h-12 flex pl-4 items-center">
+                            <div class="w-40">
+                                <p>
+                                    第 {{.ChapNum}} 章
+                                </p>
+                            </div>
+                            <div class="w-full">
+                                {{.Title}}
+                            </div>
+                            <div class="w-40 flex justify-end pr-4 gap-4">
+                                
+                                
+                                <a href="/users/{{$userID}}/courses/{{$course.ID}}/chapters/{{.ID}}/edit">編輯</a>
+                                <a>刪除</a>
+                            </div>
+                         
+                        </div>
+                    </li>
+                    {{end}}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+{{end}}

@@ -1,0 +1,43 @@
+
+
+
+
+
+{{define "nav"}}
+<!--empty-->
+{{end}}
+
+{{define "main"}}
+
+<h1>註冊頁的標題</h1>
+    <h2>註冊表單</h2>
+<form method="post" action="/user/signup">
+    <div>
+       {{with .Form.FieldErrors.email}}
+            <div>{{.}}</div>
+        {{end}}
+
+        <label>Email</label>
+        <input type="text" name="email" value="{{.Form.Email}}">
+    </div>
+    <div>
+        {{with .Form.FieldErrors.password}}
+        <div>{{.}}</div>
+        {{end}}
+        <label>Password</label>
+        <input type="password" name="password">
+    </div>
+    <div>
+        {{with .Form.FieldErrors.name}}
+        <div>{{.}}</div>
+      {{end}}
+        <label>Name</label>
+        <input type="text" name="name" value="{{.Form.Name}}">
+    </div>
+    <div>
+        <button type="submit" >註冊</button>
+        <button type="button" onclick="location.href='/user/login'">返回登入頁</button>
+    </div>
+</form>
+
+{{end}}

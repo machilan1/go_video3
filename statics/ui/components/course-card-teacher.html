@@ -1,0 +1,39 @@
+
+{{define "course-card-teacher"}}
+    <div class="w-full max-w-3xl h-60 max-h-60 p-4 border-black border-2 flex flex-col gap-3 rounded-xl">
+        <div class="flex flex-wrap gap-2">
+            {{range .Tags}}
+            <a>
+                <div class="rounded-full px-2 py-1 border-2 border-black">
+                    {{.Label}}
+                </div>
+            </a>
+            {{end}}
+        </div>
+        <a href="/users/{{.CreatedBy}}/courses/{{.ID}}">
+            <div class="h-full">
+                <h2 class="text-3xl">
+                    {{.Title}}
+                </h2>
+                <div class="text-2xl">
+                    {{.Instructor}}
+                </div>
+                <div class="mt-2">
+                    {{.Description}}
+                </div>
+            </div>
+        </a>
+        <div class="h-9 border-t-2 pt-2 border-black flex justify-between">
+            <form action="/users/{{.CreatedBy}}/courses/{{.ID}}" method="post">
+                <input class="hidden" type="text" name="_method" value="DELETE">
+                <button onclick="sendDeleteRequest('/users/{{.CreatedBy}}/courses/{{.ID}}')" class="flex gap-4">
+                    刪除
+                </button>
+            </form>
+  
+            <div>
+                {{.Views}} 次點擊
+            </div>
+        </div>
+    </div>
+{{end}}

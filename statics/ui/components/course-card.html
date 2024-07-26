@@ -1,0 +1,37 @@
+{{define "course-card"}}
+    <div class="w-full max-w-3xl h-60 max-h-60 p-4 border-black border-2 flex flex-col gap-3 rounded-xl">
+        <div class="flex flex-wrap gap-2">
+            {{range .Tags}}
+            <a>
+                <div class="rounded-full px-2 py-1 border-2 border-black">
+                    {{.Label}}
+                </div>
+            </a>
+            {{end}}
+        </div>
+        <div class="h-full">
+            <h2 class="text-3xl">
+                {{.Title}}
+            </h2>
+            <div class="text-2xl">
+                {{.Instructor}}
+            </div>
+            <div class="mt-2">
+                {{.Description}}
+            </div>
+        </div>
+        <div class="h-9 border-t-2 pt-2 border-black flex justify-between">
+            <div class="flex gap-4">
+                <span>收藏</span>
+                <div>
+                    {{.Views}} 次點擊
+                </div>
+            </div>
+            <a href="courses/{{.ID}}">
+                <div>
+                    立即觀看 >>>
+                </div>
+            </a>
+        </div>
+    </div>
+{{end}}

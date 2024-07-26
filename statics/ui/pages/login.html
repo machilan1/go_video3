@@ -1,0 +1,37 @@
+
+
+
+
+
+{{define "nav"}}
+<!--empty-->
+{{end}}
+
+{{define "main"}}
+
+
+<div class="flex justify-center flex-col items-center w-full h-screen ">
+    {{with .Flash}}
+<p >{{.}}</p>
+{{end}}
+    <div class="rounded-xl max-w-2xl gap-4 w-full border-2 border-black max-h-96 h-full flex flex-col justify-center items-center">
+        <h1 class="text-4xl py-6 px-4 font-bold">瑪雅雲端資訊平台</h1>
+        
+        <form class="flex flex-col gap-4 items-center" method="post" action="/user/login">
+            <div>
+                {{with .Form.FieldErrors.email}}
+                <p class="text-error">{{.}}</p>
+                {{end}}
+                <input value="{{.Form.Email}}" placeholder="電子信箱" class="w-full min-w-96 rounded-xl h-12 pl-6  border-2 border-gray-400" type="text" name="email">
+            </div>
+            <div>
+                {{with .Form.FieldErrors.password}}
+                <p class="text-error">{{.}}</p>
+                {{end}}
+                <input placeholder="密碼" class="w-full min-w-96 rounded-xl h-12 pl-6  border-2 border-gray-400" type="password" name="password">
+            </div>
+                <button class="py-2 px-6 rounded-xl border-2 border-gray-700" type="submit" >登入</button>
+        </form>
+    </div>
+</div>
+{{end}}
