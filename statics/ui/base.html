@@ -17,28 +17,5 @@
 
    
 </body>
-<script>
-    function sendDeleteRequest(url) {
-        fetch(url, {
-            method: 'DELETE',
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    }
-
-    function sendPatchRequest(url, data) {
-        fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-            body: data,
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    }
-</script>
 </html>
 {{end}}
