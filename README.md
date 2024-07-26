@@ -23,6 +23,13 @@ Serving
     $ make run
 
 
+Notices
+
+1. There are three users with different roles that you can login with.
+    teacher@gmail.com password (recommended login with this one)
+    student@gmail.com password
+    admin@gmail.com password
+
 
 Developing
 
