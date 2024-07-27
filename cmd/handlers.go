@@ -29,9 +29,16 @@ type userSignupForm struct {
 type updateChapterForm struct {
 	ChapNum              int    `form:"chapNum"`
 	Title                string `form:"title"`
-	Description          string `for,:"description"`
+	Description          string `form:"description"`
 	FileName             string `form:"fileName"`
 	validators.Validator `form:"-"`
+}
+
+type createCourseForm struct {
+	Title       string `form:"title"`
+	Instructor  string `form:"instructor"`
+	Tags        []int  `form:"tags"`
+	Description string `form:"description"`
 }
 
 func (app *application) viewHome(w http.ResponseWriter, r *http.Request) {
@@ -183,6 +190,21 @@ func (app *application) viewUserCourseDetail(w http.ResponseWriter, r *http.Requ
 
 }
 
+func (app *application) viewCreateUserCourse(w http.ResponseWriter, r *http.Request) {
+
+	data := app.newTemplateData(r)
+
+	tags, err := app.store.CourseStore.FindTags()
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	data.Options.Tags = tags
+
+	app.render(w, r, http.StatusOK, "user-course-create.html", data)
+
+}
+
 func (app *application) viewEditUserCourse(w http.ResponseWriter, r *http.Request) {
 	courseID, err := strconv.Atoi(r.PathValue("courseID"))
 	if err != nil {
@@ -236,6 +258,50 @@ func (app *application) viewEditCourseChapter(w http.ResponseWriter, r *http.Req
 	data.Chapter = ChapterVM{chapter}
 
 	app.render(w, r, http.StatusOK, "user-course-chapter-edit.html", data)
+}
+
+func (app *application) createCourse(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	tags := []int{}
+
+	for _, v := range r.PostForm["tags"] {
+		res, err := strconv.Atoi(v)
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		tags = append(tags, res)
+	}
+
+	UserID := app.sessionManager.GetInt(r.Context(), "currentUserID")
+
+	form := createCourseForm{
+		Title:       r.FormValue("title"),
+		Instructor:  r.FormValue("instructor"),
+		Tags:        tags,
+		Description: r.FormValue("Description"),
+	}
+
+	// TODO : validate forms
+	// TODO : 重新思考一下傳遞 DB client 的方式
+
+	err = app.store.CourseStore.CreateCourse(store.CreateCourseBody{Title: form.Title, Instructor: form.Instructor, Description: form.Description, CreatedBy: UserID})
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = app.store.CourseStore.
+		app.sessionManager.Put(r.Context(), "flash", "課程新增成功")
+
+	http.Redirect(w, r, "/users/"+fmt.Sprintf("%d", UserID)+"/courses", http.StatusSeeOther)
 }
 
 func (app *application) editCourse(w http.ResponseWriter, r *http.Request) {

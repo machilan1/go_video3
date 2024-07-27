@@ -13,6 +13,12 @@ type ChapterStore struct {
 	*sqlx.DB
 }
 
+type UpdateChapterBody struct {
+	Title       string
+	Description string
+	ChapNum     int
+}
+
 type Chapter struct {
 	ID          int       `db:"id"`
 	Title       string    `db:"title"`

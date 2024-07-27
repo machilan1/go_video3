@@ -19,7 +19,8 @@ create table course(
     created_at timestamptz not null default now(),
     created_by bigint references app_user(id) on delete set null,
     deleted_at timestamptz,
-    click_count int not null default 0
+    click_count int not null default 0,
+    updated_at timestamptz not null default now()
 );
 
 CREATE TABLE sessions (
@@ -77,3 +78,14 @@ create table history(
     updated_at timestamptz not null default now(),
     primary key (chapter_id, user_id)
 );
+
+
+CREATE OR REPLACE FUNCTION course_update_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (NEW.* IS DISTINCT FROM OLD.*) AND (NEW.click_count = OLD.click_count) THEN
+        NEW.updated_at = NOW();
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;

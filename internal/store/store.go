@@ -11,6 +11,7 @@ type Store struct {
 	CourseStore  *CourseStore
 	VideoStore   *VideoStore
 	ChapterStore *ChapterStore
+	TagStore     *TagStore
 }
 
 func NewStore(DBUrl string) (*Store, error) {
@@ -26,6 +27,7 @@ func NewStore(DBUrl string) (*Store, error) {
 		CourseStore:  newCourseStore(db),
 		VideoStore:   newVideoStore(db),
 		ChapterStore: newChapterStore(db),
+		TagStore:     newTagStore(db),
 	}
 
 	return &s, nil

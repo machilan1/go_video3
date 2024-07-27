@@ -3,6 +3,7 @@ package store
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -20,18 +21,20 @@ type Course struct {
 	Tags        []CourseTag `db:"-"`
 	Chapters    []Chapter   `db:"-"`
 	CreatedBy   int         `db:"created_by"`
+	UpdatedAt   time.Time   `db:"updated_at"`
 }
 
-type CourseTag struct {
-	ID       int    `db:"id"`
-	Label    string `db:"label"`
-	Selected bool   `db:"-"`
+type FindCoursesParams struct {
+	Page   int
+	Limit  int
+	UserID int
 }
 
-type UpdateChapterBody struct {
+type CreateCourseBody struct {
 	Title       string
+	Instructor  string
 	Description string
-	ChapNum     int
+	CreatedBy   int
 }
 
 type UpdateCourseBody struct {
@@ -47,31 +50,14 @@ func newCourseStore(DB *sqlx.DB) *CourseStore {
 	}
 	return &s
 }
-func (s *CourseStore) FindTagsWithCourseID(ID int) ([]CourseTag, error) {
-	var t []CourseTag
-	err := s.DB.Select(&t, `
-		select 
-			t.id,
-			t.label
-		from course_tag ct
-		left join tag t on t.id = ct.tag_id
-		where ct.course_id = $1
-		`, ID)
+
+func (s *CourseStore) CreateCourse(b CreateCourseBody) error {
+	// TODO : 統一 DB client 的呼叫方法
+	_, err := s.Exec("insert into course (name,instructor_name,description, created_by) values($1,$2,$3,$4)", b.Title, b.Instructor, b.Description, b.CreatedBy)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return t, nil
-}
-
-func (s *CourseStore) FindTags() ([]CourseTag, error) {
-	var tags []CourseTag
-
-	err := s.DB.Select(&tags, "select label, id from tag")
-	if err != nil {
-		return nil, err
-	}
-	return tags, nil
+	return nil
 }
 
 func (s *CourseStore) UpdateCourse(courseID int, b UpdateCourseBody) error {
@@ -142,9 +128,10 @@ func (s *CourseStore) UpdateCourse(courseID int, b UpdateCourseBody) error {
 	return err
 }
 
+// TODO : Figure out a way to refactor this
 func (s *CourseStore) FindOne(id int) (Course, error) {
 
-	// find related chaptors
+	// find related chapters
 	chapters := []Chapter{}
 	course := Course{}
 
@@ -195,12 +182,6 @@ func (s *CourseStore) FindOne(id int) (Course, error) {
 
 }
 
-type FindCoursesParams struct {
-	Page   int
-	Limit  int
-	UserID int
-}
-
 func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 	c := []Course{}
 	courses := &c
@@ -214,10 +195,11 @@ func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 			c.description, 
 			c.instructor_name, 
 			c.click_count,
-			c.created_by
+			c.created_by,
+			c.updated_at
 		from course c
 		where c.created_by =$1
-		order by c. created_by desc
+		order by c.updated_at desc
 		offset $2 limit $3;
 		`, p.UserID, (p.Page-1)*p.Limit, p.Limit)
 		if err != nil {
@@ -231,9 +213,10 @@ func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 		c.description, 
 		c.instructor_name, 
 		c.click_count,
-		c.created_by 
+		c.created_by,
+		c.updated_at
 	from course c
-	order by c. created_by desc
+	order by c.updated_at desc
 	offset $1 limit $2;
 	`, (p.Page-1)*p.Limit, p.Limit)
 		if err != nil {
@@ -252,7 +235,3 @@ func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 	res := *courses
 	return res, nil
 }
-
-// func (s *CourseStore) create() {}
-// func (s *CourseStore) update() {}
-// func (s *CourseStore) delete() {}

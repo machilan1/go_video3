@@ -1,6 +1,6 @@
 
 {{define "course-card-teacher"}}
-    <div class="w-full max-w-3xl h-60 max-h-60 p-4 border-black border-2 flex flex-col gap-3 rounded-xl">
+    <div class="w-full max-w-3xl  p-4 border-black border-2 flex flex-col gap-3 rounded-xl">
         <div class="flex flex-wrap gap-2">
             {{range .Tags}}
             <a>
@@ -20,6 +20,11 @@
                 </div>
                 <div class="mt-2">
                     {{.Description}}
+                </div>
+                <div class="mt-2 flex justify-end text-sm">
+                    {{with .UpdatedAt.Local}}
+                    Last update : {{.Year}}, {{.Month}} {{.Day}}  {{.Hour}}:{{.Minute}}
+                    {{end}}
                 </div>
             </div>
         </a>
