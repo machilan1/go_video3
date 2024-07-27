@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -25,9 +26,10 @@ type Course struct {
 }
 
 type FindCoursesParams struct {
-	Page   int
-	Limit  int
-	UserID int
+	Page       int
+	Limit      int
+	UserID     int
+	SearchText string
 }
 
 type CreateCourseBody struct {
@@ -220,48 +222,68 @@ func (s *CourseStore) FindOne(ID int) (Course, error) {
 }
 
 func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
-	c := []Course{}
-	courses := &c
-	var err error
+	courses := []Course{}
 
-	if p.UserID != 0 {
-		err = s.db.Select(courses, `
-		select  
+	selectStatement := `
+		select
 			c.id,
 			c.name,
-			c.description, 
-			c.instructor_name, 
+			c.description,
+			c.instructor_name,
 			c.click_count,
 			c.created_by,
 			c.updated_at
 		from course c
-		where c.created_by =$1
-		order by c.updated_at desc
-		offset $2 limit $3;
-		`, p.UserID, (p.Page-1)*p.Limit, p.Limit)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		err = s.db.Select(courses, `
-	select  
-		c.id,
-		c.name,
-		c.description, 
-		c.instructor_name, 
-		c.click_count,
-		c.created_by,
-		c.updated_at
-	from course c
-	order by c.updated_at desc
-	offset $1 limit $2;
-	`, (p.Page-1)*p.Limit, p.Limit)
-		if err != nil {
-			return nil, err
-		}
+	`
+
+	whereConditions := []string{}
+
+	index := 1
+	values := []any{}
+
+	if p.SearchText != "" {
+		whereConditions = append(whereConditions, `c.name like '%'||$$||'%'`)
+		values = append(values, p.SearchText)
 	}
 
-	for i, v := range *courses {
+	if p.UserID != 0 {
+		whereConditions = append(whereConditions, "c.created_by = $$")
+		values = append(values, p.UserID)
+	}
+
+	for i, _ := range whereConditions {
+		whereConditions[i] = strings.Replace(whereConditions[i], "$$", "$"+fmt.Sprintf("%d", index), 1)
+		index++
+	}
+
+	var whereClause string
+	if len(whereConditions) > 0 {
+		whereClause = "where " + strings.Join(whereConditions, " and ")
+	}
+	var limitClause string
+	var offsetClause string
+
+	if p.Limit > 0 {
+		limitClause = " limit $" + fmt.Sprintf("%d", index)
+		index++
+		values = append(values, p.Limit)
+	}
+
+	if offset := (p.Limit) * (p.Page - 1); offset > 0 {
+		offsetClause = " offset $" + fmt.Sprintf("%d", index)
+		index++
+		values = append(values, offset)
+	}
+
+	final := selectStatement + whereClause + limitClause + offsetClause
+
+	err := s.db.Select(&courses, final, values...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i, v := range courses {
 		var t []CourseTag
 		err := s.db.Select(&t, `
 		select 
@@ -274,10 +296,10 @@ func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 		if err != nil {
 			return nil, err
 		}
-		(*courses)[i].Tags = t
+		(courses)[i].Tags = t
 	}
 
-	res := *courses
+	res := courses
 	return res, nil
 }
 

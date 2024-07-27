@@ -3,7 +3,6 @@ GREEN=\033[0;32m
 YELLOW=\033[0;33m
 NC=\033[0m
 
-
 default: 
 	@echo " ${RED}Please specify the target to run"
 
@@ -21,7 +20,7 @@ endif
 
 
 run:
-	go run ./cmd
+	air
 
 tidy:
 	go mod tidy
@@ -32,6 +31,13 @@ resetDB:
 
 psql:
 	psql -h localhost -p 5432 -U postgres -d maya
+
+migrate:
+	migrate create -seq -ext=.sql -dir=sql/migrations $(name)
+
+migrate-up:
+	migrate -path sql/migrations -database="postgresql://postgres:123456@localhost:5432/maya?sslmode=disable" -verbose up
+
 
 
 tailwindcss-install-wsl:

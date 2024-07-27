@@ -51,7 +51,29 @@ type createCourseForm struct {
 
 func (app *application) viewHome(w http.ResponseWriter, r *http.Request) {
 
-	courses, err := app.store.CourseStore.FindMany(store.FindCoursesParams{Page: 1, Limit: 20})
+	limit, err := app.parseQueryInt(r, "limit")
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	page, err := app.parseQueryInt(r, "page")
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	searchText := app.parseQuery(r, "searchText")
+
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 50 {
+		limit = 50
+	}
+	if page < 1 {
+		page = 1
+	}
+
+	courses, err := app.store.CourseStore.FindMany(store.FindCoursesParams{Page: page, Limit: limit, SearchText: searchText})
 	if err != nil {
 		app.serverError(w, r, err)
 	}
@@ -91,7 +113,7 @@ func (app *application) viewCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// find info with id
+	// find info with idK
 
 	c, err := app.store.CourseStore.FindOne(id)
 	if err != nil {
@@ -286,6 +308,18 @@ func (app *application) viewCreateChapter(w http.ResponseWriter, r *http.Request
 func (app *application) viewAdminUsers(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	app.render(w, r, http.StatusOK, "admin-users-list.html", data)
+}
+
+func (app *application) searchCourse(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	// searchText := r.FormValue("searchText")
+
+	// courses:= app.store.CourseStore.FindMany()
+
 }
 
 func (app *application) createCourse(w http.ResponseWriter, r *http.Request) {

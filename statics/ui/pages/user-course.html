@@ -39,15 +39,25 @@
         </form>
     </div>
     <div class="flex gap-2">
+        <a href="/users/{{.UserID}}/courses/create">
+            <div class="mr-4 py-2 px-6 rounded-xl border-2 bg-black text-white border-gray-700">創建</div>
+        </a>
+        
         <a>
             <div class="py-2 px-6 rounded-xl border-2 border-gray-700">全部</div>
         </a>
-    </div>
 
+    </div>
+    {{if .CourseCards}}
     <div class="grid grid-cols-2 gap-x-8 gap-y-6">
         {{range .CourseCards}}
         {{template "course-card-teacher" .}}
         {{end}}
     </div>
+    {{else}}
+    <div>
+        <p>你還沒有創建任何課程</p>
+    </div>
+    {{end}}
 </div>
 {{end}}

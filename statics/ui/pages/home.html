@@ -7,9 +7,9 @@
     </a>
     <div>
         <ul class="flex gap-4">
-            {{if .CanUpdate}}
+            {{if or .CanUpdate .IsAdmin}}
             <li>
-                <a href="/users/3/courses">
+                <a href="/users/{{.UserID}}/courses">
                     <button class="text-2xl">
                         我的課程
                     </button>
@@ -38,8 +38,8 @@
         首頁
     </h2>
     <div class="flex justify-center">
-        <form class="w-full" method="get" action="/search">
-            <input placeholder="搜尋課程" class="w-full rounded-xl h-12 pl-6  border-2 border-gray-400" type="text" name="srchText">
+        <form class="w-full" method="get" action="/">
+            <input placeholder="搜尋課程" class="w-full rounded-xl h-12 pl-6  border-2 border-gray-400" type="text" name="searchText">
         </form>
     </div>
     <div class="flex gap-2">

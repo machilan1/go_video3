@@ -27,9 +27,9 @@ func (app *application) routes() http.Handler {
 	//Protected
 	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogout))
 	mux.Handle("POST /files/upload", protected.ThenFunc(app.upload))
-	mux.Handle("GET /{$}", protected.ThenFunc(app.viewHome))
+	mux.Handle("GET /{$}", dynamic.ThenFunc(app.viewHome))
 	// TODO : Develope this later
-	// mux.Handle("GET /courses/search",protected.ThenFunc(app.searchCourse))
+	mux.Handle("GET /courses/search", dynamic.ThenFunc(app.searchCourse))
 	mux.Handle("GET /courses/{ID}", protected.ThenFunc(app.viewCourse))
 	mux.Handle("GET /courses/{courseID}/chapters/{chapterID}", protected.ThenFunc(app.viewChapter))
 
