@@ -9,7 +9,7 @@ import (
 )
 
 type CourseStore struct {
-	*sqlx.DB
+	db *sqlx.DB
 }
 
 type Course struct {
@@ -35,6 +35,7 @@ type CreateCourseBody struct {
 	Instructor  string
 	Description string
 	CreatedBy   int
+	Tags        []int
 }
 
 type UpdateCourseBody struct {
@@ -46,23 +47,49 @@ type UpdateCourseBody struct {
 
 func newCourseStore(DB *sqlx.DB) *CourseStore {
 	s := CourseStore{
-		DB: DB,
+		db: DB,
 	}
 	return &s
 }
 
 func (s *CourseStore) CreateCourse(b CreateCourseBody) error {
-	// TODO : 統一 DB client 的呼叫方法
-	_, err := s.Exec("insert into course (name,instructor_name,description, created_by) values($1,$2,$3,$4)", b.Title, b.Instructor, b.Description, b.CreatedBy)
+	tx, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
+	var lastInsertId int
+
+	err = tx.QueryRow("insert into course (name,instructor_name,description, created_by) values($1,$2,$3,$4) returning id", b.Title, b.Instructor, b.Description, b.CreatedBy).Scan(&lastInsertId)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// insert tags
+
+	var valuesPairs []string
+
+	for _, v := range b.Tags {
+		valuesPairs = append(valuesPairs, `(`+strconv.Itoa(v)+`,`+strconv.Itoa(lastInsertId)+`)`)
+	}
+
+	valuesString := strings.Join(valuesPairs, ",")
+
+	if valuesString != "" {
+		_, err = tx.Exec("insert into course_tag (tag_id,course_id) values " + valuesString)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	tx.Commit()
 	return nil
 }
 
 func (s *CourseStore) UpdateCourse(courseID int, b UpdateCourseBody) error {
 
-	tr, err := s.Begin()
+	tr, err := s.db.Begin()
 	if err != nil {
 		return err
 	}
@@ -117,7 +144,7 @@ func (s *CourseStore) UpdateCourse(courseID int, b UpdateCourseBody) error {
 	index := strconv.Itoa(interpolationIndex)
 
 	_, err = tr.Exec("update course set "+fieldsString+` where id = $`+index, valueList...)
-	//
+
 	if err != nil {
 		return err
 	}
@@ -125,17 +152,18 @@ func (s *CourseStore) UpdateCourse(courseID int, b UpdateCourseBody) error {
 	if err != nil {
 		return err
 	}
+
 	return err
 }
 
 // TODO : Figure out a way to refactor this
-func (s *CourseStore) FindOne(id int) (Course, error) {
+func (s *CourseStore) FindOne(ID int) (Course, error) {
 
 	// find related chapters
 	chapters := []Chapter{}
 	course := Course{}
 
-	err := s.Select(&chapters, `
+	err := s.db.Select(&chapters, `
 	select 
 		c.id, 
 		c.title, 
@@ -150,13 +178,13 @@ func (s *CourseStore) FindOne(id int) (Course, error) {
 	join video v on v.id = c.video_id 
 	where c.course_id = $1
 	order by c.chap_num asc
-		`, id)
+		`, ID)
 
 	if err != nil {
 		return Course{}, err
 	}
 
-	err = s.Get(&course, `
+	err = s.db.Get(&course, `
 	select 
 		c.id,
 		c.name,
@@ -166,18 +194,28 @@ func (s *CourseStore) FindOne(id int) (Course, error) {
 		c.created_by
 		from course c 
 	where c.id = $1
-	`, id)
+	`, ID)
 
 	if err != nil {
 		return Course{}, err
 	}
 
 	course.Chapters = chapters
-	t, err := s.FindTagsWithCourseID(id)
+
+	var t []CourseTag
+	err = s.db.Select(&t, `
+		select 
+			t.id,
+			t.label
+		from course_tag ct
+		left join tag t on t.id = ct.tag_id
+		where ct.course_id = $1
+		`, ID)
+	course.Tags = t
 	if err != nil {
 		return Course{}, err
 	}
-	course.Tags = t
+
 	return course, nil
 
 }
@@ -188,7 +226,7 @@ func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 	var err error
 
 	if p.UserID != 0 {
-		err = s.DB.Select(courses, `
+		err = s.db.Select(courses, `
 		select  
 			c.id,
 			c.name,
@@ -206,7 +244,7 @@ func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 			return nil, err
 		}
 	} else {
-		err = s.DB.Select(courses, `
+		err = s.db.Select(courses, `
 	select  
 		c.id,
 		c.name,
@@ -225,7 +263,15 @@ func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 	}
 
 	for i, v := range *courses {
-		t, err := s.FindTagsWithCourseID(v.ID)
+		var t []CourseTag
+		err := s.db.Select(&t, `
+		select 
+			t.id,
+			t.label
+		from course_tag ct
+		left join tag t on t.id = ct.tag_id
+		where ct.course_id = $1
+		`, v.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -234,4 +280,13 @@ func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 
 	res := *courses
 	return res, nil
+}
+
+func (s *CourseStore) Delete(ID int) error {
+	_, err := s.db.Exec("delete from course where id =$1", ID)
+
+	if err != nil {
+		return err
+	}
+	return nil
 }

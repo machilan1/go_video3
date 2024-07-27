@@ -44,6 +44,9 @@ type createCourseForm struct {
 func (app *application) viewHome(w http.ResponseWriter, r *http.Request) {
 
 	// fetch courses
+
+	// tx,err:=app.store.DB.
+
 	param := store.FindCoursesParams{Page: 1, Limit: 20}
 	courses, err := app.store.CourseStore.FindMany(param)
 	if err != nil {
@@ -142,7 +145,11 @@ func (app *application) viewUserCourse(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusBadGateway)
 	}
 
-	courses, err := app.store.CourseStore.FindMany(store.FindCoursesParams{Limit: 20, Page: 1, UserID: userID})
+	courses, err := app.store.CourseStore.FindMany(store.FindCoursesParams{
+		Limit:  20,
+		Page:   1,
+		UserID: userID})
+
 	if err != nil {
 		app.serverError(w, r, err)
 	}
@@ -194,7 +201,7 @@ func (app *application) viewCreateUserCourse(w http.ResponseWriter, r *http.Requ
 
 	data := app.newTemplateData(r)
 
-	tags, err := app.store.CourseStore.FindTags()
+	tags, err := app.store.TagStore.FindTags()
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -221,7 +228,7 @@ func (app *application) viewEditUserCourse(w http.ResponseWriter, r *http.Reques
 		tagIDs = append(tagIDs, v.ID)
 	}
 
-	tags, err := app.store.CourseStore.FindTags()
+	tags, err := app.store.TagStore.FindTags()
 	if err != nil {
 		app.serverError(w, r, err)
 	}
@@ -286,21 +293,24 @@ func (app *application) createCourse(w http.ResponseWriter, r *http.Request) {
 		Title:       r.FormValue("title"),
 		Instructor:  r.FormValue("instructor"),
 		Tags:        tags,
-		Description: r.FormValue("Description"),
+		Description: r.FormValue("description"),
 	}
 
 	// TODO : validate forms
-	// TODO : 重新思考一下傳遞 DB client 的方式
 
-	err = app.store.CourseStore.CreateCourse(store.CreateCourseBody{Title: form.Title, Instructor: form.Instructor, Description: form.Description, CreatedBy: UserID})
+	err = app.store.CourseStore.CreateCourse(store.CreateCourseBody{
+		Title:       form.Title,
+		Instructor:  form.Instructor,
+		Description: form.Description,
+		CreatedBy:   UserID,
+		Tags:        form.Tags})
+
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	err = app.store.CourseStore.
-		app.sessionManager.Put(r.Context(), "flash", "課程新增成功")
-
+	app.sessionManager.Put(r.Context(), "flash", "課程新增成功")
 	http.Redirect(w, r, "/users/"+fmt.Sprintf("%d", UserID)+"/courses", http.StatusSeeOther)
 }
 
@@ -334,7 +344,14 @@ func (app *application) editCourse(w http.ResponseWriter, r *http.Request) {
 	instructor := r.PostForm.Get("instructor")
 	description := r.PostForm.Get("description")
 
-	err = app.store.CourseStore.UpdateCourse(courseID, store.UpdateCourseBody{Title: title, Instructor: instructor, Tags: tagIds, Description: description})
+	fmt.Println(description)
+
+	err = app.store.CourseStore.UpdateCourse(courseID, store.UpdateCourseBody{
+		Title:       title,
+		Instructor:  instructor,
+		Tags:        tagIds,
+		Description: description})
+
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -408,10 +425,17 @@ func (app *application) editChapter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) deleteCourse(w http.ResponseWriter, r *http.Request) {
-	// TODO : Pending development
 
-	fmt.Println(r.Method)
-	fmt.Println("CourseDelete")
+	courseID, err := strconv.Atoi(r.PathValue("courseID"))
+	userID := r.PathValue("userID")
+
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+	}
+
+	app.store.CourseStore.Delete(courseID)
+	app.sessionManager.Put(r.Context(), "flash", "課程刪除成功")
+	http.Redirect(w, r, "/users/"+userID+"/courses", http.StatusSeeOther)
 }
 
 func (app *application) login(w http.ResponseWriter, r *http.Request) {

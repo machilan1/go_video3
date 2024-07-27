@@ -36,12 +36,11 @@ func (app *application) routes() http.Handler {
 
 	mux.Handle("GET /users/{userID}/courses", updater.ThenFunc(app.viewUserCourse))
 	// TODO : Create course undeveloped.
-	mux.Handle("GET /users/{userID}/create-course", updater.ThenFunc(app.viewCreateUserCourse))
+	mux.Handle("GET /users/{userID}/courses/create", updater.ThenFunc(app.viewCreateUserCourse))
 	mux.Handle("POST /users/{userID}/courses", updater.ThenFunc(app.createCourse))
 	mux.Handle("GET /users/{userID}/courses/{courseID}", updater.ThenFunc(app.viewUserCourseDetail))
 	mux.Handle("GET /users/{userID}/courses/{courseID}/edit", updater.ThenFunc(app.viewEditUserCourse))
 	mux.Handle("PATCH /users/{userID}/courses/{courseID}", updater.ThenFunc(app.editCourse))
-
 	mux.Handle("GET /users/{userID}/courses/{courseID}/chapters/{chapterID}/edit", updater.ThenFunc(app.viewEditCourseChapter))
 	mux.Handle("PATCH /users/{userID}/courses/{courseID}/chapters/{chapterID}", updater.ThenFunc(app.editChapter))
 	// TODO : delete course undeveloped.

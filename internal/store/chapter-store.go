@@ -10,7 +10,7 @@ import (
 )
 
 type ChapterStore struct {
-	*sqlx.DB
+	db *sqlx.DB
 }
 
 type UpdateChapterBody struct {
@@ -42,7 +42,7 @@ func (s *ChapterStore) FindOneChapter(chapterID int) (Chapter, error) {
 
 	var chapter Chapter
 
-	err := s.Get(&chapter, `
+	err := s.db.Get(&chapter, `
 	select
 		c.id,
 		c.title,
@@ -100,7 +100,7 @@ func (s *ChapterStore) UpdateChapterInfo(chapterID int, b UpdateChapterBody) err
 
 	valueList = append(valueList, chapterID)
 	index := strconv.Itoa(interpolationIndex)
-	_, err := s.Exec(`update chapter set `+fieldsString+` where id =$`+index, valueList...)
+	_, err := s.db.Exec(`update chapter set `+fieldsString+` where id =$`+index, valueList...)
 	if err != nil {
 		return err
 	}

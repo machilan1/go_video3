@@ -7,7 +7,7 @@ import (
 )
 
 type UserStore struct {
-	*sqlx.DB
+	db *sqlx.DB
 }
 
 type User struct {
@@ -25,7 +25,7 @@ type User struct {
 func newUserStore(DB *sqlx.DB) *UserStore {
 
 	s := UserStore{
-		DB: DB,
+		db: DB,
 	}
 	return &s
 
@@ -46,7 +46,7 @@ type FindOneWithEmailParam struct {
 }
 
 func (s *UserStore) Create(p CreateUserParam) error {
-	_, err := s.DB.Exec("insert into app_user (name ,email ,password) values($1 , $2 ,$3)", p.Name, p.Email, p.Password)
+	_, err := s.db.Exec("insert into app_user (name ,email ,password) values($1 , $2 ,$3)", p.Name, p.Email, p.Password)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func (s *UserStore) FindOneWithEmail(e string) (User, error) {
 
 	var u User
 
-	err := s.DB.Get(&u,
+	err := s.db.Get(&u,
 		`select 
 			id, 
 			name, 

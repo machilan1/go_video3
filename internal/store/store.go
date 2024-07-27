@@ -6,7 +6,7 @@ import (
 )
 
 type Store struct {
-	DB           *sqlx.DB
+	db           *sqlx.DB
 	UserStore    *UserStore
 	CourseStore  *CourseStore
 	VideoStore   *VideoStore
@@ -22,7 +22,7 @@ func NewStore(DBUrl string) (*Store, error) {
 	}
 
 	s := Store{
-		DB:           db,
+		db:           db,
 		UserStore:    newUserStore(db),
 		CourseStore:  newCourseStore(db),
 		VideoStore:   newVideoStore(db),
