@@ -4,3 +4,4 @@ bin
 statics/videos
 tmp
 sandbox
+vendor

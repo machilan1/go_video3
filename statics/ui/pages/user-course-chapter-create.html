@@ -1,0 +1,86 @@
+{{define "nav"}}
+<div class="px-4 mb-10 border-b-2 border-black flex justify-between items-center h-20">
+    <a class="text-4xl" href="/">
+        瑪雅資訊雲端平台
+    </a>
+    <div>
+        <ul class="flex gap-4">
+            {{if .IsAuthenticated}}
+            <li>
+                <form action="/user/logout" method="post">
+                    <button  class="text-2xl" >
+                        登出
+                    </button>
+                </form>
+            </li>
+            {{end}}
+        </ul>
+    </div>
+</div>
+{{end}}
+
+{{define "main"}}
+<div>
+    <div class="w-full px-40 flex flex-col gap-4" enctype="multipart/form-data">
+        <h2 class="text-5xl">
+            新增章節
+        </h2>
+        <div>
+            <a href="/users/{{.UserID}}/courses/{{.CourseID}}">👈返回</a>
+        </div>
+       
+        <form infoForm class="flex flex-col gap-4"  method="post" action="/users/{{.UserID}}/courses/{{.CourseID}}/chapters">
+
+            <div>
+                <label for="title">章節數</label>
+                <input type="text" name="chapNum" id="title" value="{{.Chapter.ChapNum}}" class="w-full rounded-xl h-12 pl-6  border-2 border-gray-400">
+            </div>
+            <div>
+                <label for="title">標題</label>
+                <input type="text" name="title" id="title" value="{{.Chapter.Title}}" class="w-full rounded-xl h-12 pl-6  border-2 border-gray-400">
+            </div>
+            <div>
+                <label for="title">章節資訊</label>
+                <textarea rows="7" class="w-full pl-4 pt-4 rounded-xl border-2 border-black" type="text" name="description">{{.Chapter.Description}}</textarea>
+            </div>
+            <input type="hidden" name="fileName" value="{{.Chapter.FileName}}">
+        </form>
+        <form fileForm action="/files/upload" method="post" enctype="multipart/form-data">
+            <div class="cursor-pointer w-full rounded-xl  h-12 pl-6 flex justify-center flex-col gap-4  border-2 border-gray-400">
+                <label for="file-uploader" class="cursor-pointer">
+                    <span  selectedFile >上傳影片</span>
+                </label>
+                <div class="hidden">
+                    <input type="file" name="file" id="file-uploader">
+                </div>
+            </div>
+        </form>    
+            <div>
+                <button submitButton type="button" >儲存</button>
+            </div>
+
+    </div>
+</div>
+
+<script>
+    const fileUploader = document.querySelector('#file-uploader');
+    
+        fileUploader.addEventListener('change', async(e) => {
+        document.querySelector('[selectedFile]').innerHTML = e.target.files[0].name;
+            const formData = new FormData();
+            formData.append('file', e.target.files[0]);
+             const res = await fetch('/files/upload', {
+                method: 'POST',
+                body: formData
+            })
+            const data = await res.json();
+            document.querySelector('[infoForm]').fileName.value = data.fileName;
+        })
+
+        document.querySelector('[submitButton]').addEventListener('click', () => {
+            document.querySelector('[infoForm]').submit();
+        });
+
+</script>
+
+{{end}}

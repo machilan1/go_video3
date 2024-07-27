@@ -34,6 +34,14 @@ type updateChapterForm struct {
 	validators.Validator `form:"-"`
 }
 
+type createChapterForm struct {
+	Title       string `form:"title"`
+	Description string `form:"description"`
+	ChapNum     int    `form:"chapNum"`
+	CourseID    int    `form:"courseID"`
+	FileName    string `form:"fileName"`
+}
+
 type createCourseForm struct {
 	Title       string `form:"title"`
 	Instructor  string `form:"instructor"`
@@ -43,12 +51,7 @@ type createCourseForm struct {
 
 func (app *application) viewHome(w http.ResponseWriter, r *http.Request) {
 
-	// fetch courses
-
-	// tx,err:=app.store.DB.
-
-	param := store.FindCoursesParams{Page: 1, Limit: 20}
-	courses, err := app.store.CourseStore.FindMany(param)
+	courses, err := app.store.CourseStore.FindMany(store.FindCoursesParams{Page: 1, Limit: 20})
 	if err != nil {
 		app.serverError(w, r, err)
 	}
@@ -84,7 +87,7 @@ func (app *application) viewCourse(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(r.PathValue("ID"))
 	if err != nil {
-		app.clientError(w, http.StatusBadGateway)
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
@@ -106,12 +109,12 @@ func (app *application) viewCourse(w http.ResponseWriter, r *http.Request) {
 func (app *application) viewChapter(w http.ResponseWriter, r *http.Request) {
 	courseId, err := strconv.Atoi(r.PathValue("courseID"))
 	if err != nil {
-		app.clientError(w, http.StatusBadGateway)
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 	chapterId, err := strconv.Atoi(r.PathValue("chapterID"))
 	if err != nil {
-		app.clientError(w, http.StatusBadGateway)
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
 
@@ -133,6 +136,7 @@ func (app *application) viewChapter(w http.ResponseWriter, r *http.Request) {
 
 	data := app.newTemplateData(r)
 	data.Course = CourseVM{c}
+
 	data.Chapter = ChapterVM{chp}
 
 	app.render(w, r, http.StatusOK, "course.html", data)
@@ -142,7 +146,8 @@ func (app *application) viewChapter(w http.ResponseWriter, r *http.Request) {
 func (app *application) viewUserCourse(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(r.PathValue("userID"))
 	if err != nil {
-		app.clientError(w, http.StatusBadGateway)
+		app.clientError(w, http.StatusBadRequest)
+		return
 	}
 
 	courses, err := app.store.CourseStore.FindMany(store.FindCoursesParams{
@@ -152,6 +157,7 @@ func (app *application) viewUserCourse(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 
 	var courseCards []courseCardVM
@@ -168,19 +174,10 @@ func (app *application) viewUserCourse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) viewUserCourseDetail(w http.ResponseWriter, r *http.Request) {
-	userID, err := strconv.Atoi(r.PathValue("userID"))
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
+
 	courseID, err := strconv.Atoi(r.PathValue("courseID"))
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-	sessionUserID := app.sessionManager.GetInt(r.Context(), "currentUserID")
-	if sessionUserID != userID {
-		app.clientError(w, http.StatusUnauthorized)
 		return
 	}
 
@@ -216,11 +213,13 @@ func (app *application) viewEditUserCourse(w http.ResponseWriter, r *http.Reques
 	courseID, err := strconv.Atoi(r.PathValue("courseID"))
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
+		return
 	}
 
 	course, err := app.store.CourseStore.FindOne(courseID)
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 	tagIDs := []int{}
 
@@ -231,6 +230,7 @@ func (app *application) viewEditUserCourse(w http.ResponseWriter, r *http.Reques
 	tags, err := app.store.TagStore.FindTags()
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 
 	for i := 0; i < len(tags); i++ {
@@ -253,18 +253,39 @@ func (app *application) viewEditCourseChapter(w http.ResponseWriter, r *http.Req
 	chapterID, err := strconv.Atoi(r.PathValue("chapterID"))
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
+		return
 	}
 
 	// get chapter data
 	chapter, err := app.store.ChapterStore.FindOneChapter(chapterID)
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 
 	data := app.newTemplateData(r)
 	data.Chapter = ChapterVM{chapter}
 
 	app.render(w, r, http.StatusOK, "user-course-chapter-edit.html", data)
+}
+
+func (app *application) viewCreateChapter(w http.ResponseWriter, r *http.Request) {
+
+	courseID, err := strconv.Atoi(r.PathValue("courseID"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.CourseID = courseID
+	app.render(w, r, http.StatusOK, "user-course-chapter-create.html", data)
+
+}
+
+func (app *application) viewAdminUsers(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	app.render(w, r, http.StatusOK, "admin-users-list.html", data)
 }
 
 func (app *application) createCourse(w http.ResponseWriter, r *http.Request) {
@@ -314,6 +335,64 @@ func (app *application) createCourse(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/users/"+fmt.Sprintf("%d", UserID)+"/courses", http.StatusSeeOther)
 }
 
+func (app *application) createChapter(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	courseID, err := strconv.Atoi(r.PathValue("courseID"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	userID := app.sessionManager.GetInt(r.Context(), "currentUserID")
+
+	fileName := r.FormValue("fileName")
+	description := r.FormValue("description")
+	title := r.FormValue("title")
+	chapNum, err := strconv.Atoi(r.FormValue("chapNum"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// TODO : 想一下怎麼樣實現 Transaction比較好
+
+	// 新增影片實例
+	videoID, err := app.store.VideoStore.CreateVideo(store.CreateVideoBody{
+		FileName:    fileName,
+		Description: description,
+		UpdatedBy:   userID,
+	})
+
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	// 新增章節
+
+	_, err = app.store.ChapterStore.Create(courseID, store.CreateChapterBody{
+		Title:       title,
+		Description: description,
+		ChapNum:     chapNum,
+		VideoID:     videoID,
+	})
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "已新增章節")
+
+	http.Redirect(w, r, "/users/"+fmt.Sprintf("%d", userID)+"/courses/"+fmt.Sprintf("%d", courseID), http.StatusSeeOther)
+
+}
+
 func (app *application) editCourse(w http.ResponseWriter, r *http.Request) {
 
 	// TODO : Finish Validation
@@ -321,6 +400,7 @@ func (app *application) editCourse(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
+		return
 	}
 
 	courseID, err := strconv.Atoi(r.PathValue("courseID"))
@@ -343,8 +423,6 @@ func (app *application) editCourse(w http.ResponseWriter, r *http.Request) {
 	title := r.PostForm.Get("title")
 	instructor := r.PostForm.Get("instructor")
 	description := r.PostForm.Get("description")
-
-	fmt.Println(description)
 
 	err = app.store.CourseStore.UpdateCourse(courseID, store.UpdateCourseBody{
 		Title:       title,
@@ -409,18 +487,41 @@ func (app *application) editChapter(w http.ResponseWriter, r *http.Request) {
 	err = app.store.VideoStore.UpdateVideo(videoID, store.UpdateVideoBody{FileName: fileName})
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 
 	// Update chapter data
 	err = app.store.ChapterStore.UpdateChapterInfo(chapterID, store.UpdateChapterBody{Title: title, Description: description, ChapNum: chapNum})
 	if err != nil {
-		fmt.Println(err)
-
 		app.serverError(w, r, err)
 		return
 	}
 
 	http.Redirect(w, r, "/users/"+userID+"/courses/"+courseID, http.StatusSeeOther)
+
+}
+
+func (app *application) deleteChapter(w http.ResponseWriter, r *http.Request) {
+	chapterID, err := strconv.Atoi(r.PathValue("chapterID"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	courseID, err := strconv.Atoi(r.PathValue("courseID"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	userID := app.sessionManager.GetInt(r.Context(), "currentUserID")
+	err = app.store.ChapterStore.Delete(chapterID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "已刪除章節")
+
+	http.Redirect(w, r, "/users/"+fmt.Sprintf("%d", userID)+"/courses/"+fmt.Sprintf("%d", courseID), http.StatusSeeOther)
 
 }
 
@@ -431,6 +532,7 @@ func (app *application) deleteCourse(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
+		return
 	}
 
 	app.store.CourseStore.Delete(courseID)
@@ -442,6 +544,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
+		return
 	}
 
 	form := userLoginForm{
@@ -476,17 +579,11 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 給session token
 	app.sessionManager.Put(r.Context(), "flash", "登入成功")
-
-	// 把 userID 資訊夾在Context
 	app.sessionManager.Put(r.Context(), "currentUserID", user.Id)
-
-	// 把權限資訊夾在Context
 	app.sessionManager.Put(r.Context(), "canUpdate", user.CanUpdate)
 	app.sessionManager.Put(r.Context(), "isAdmin", user.IsAdmin)
 
-	// redirect to home
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
 }
@@ -495,21 +592,23 @@ func (app *application) viewSignUp(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 
 	if !data.IsAdmin {
-		app.clientError(w, http.StatusUnauthorized)
+		app.clientError(w, http.StatusForbidden)
 		return
 	}
+
 	data.Form = userSignupForm{}
 	flash := app.sessionManager.PopString(r.Context(), "flash")
 	data.Flash = flash
 
-	app.render(w, r, 200, "signup.html", data)
+	app.render(w, r, http.StatusOK, "signup.html", data)
 }
 
+// TODO : make sure you want to keep this handler.
 func (app *application) signUp(w http.ResponseWriter, r *http.Request) {
-	// validate inputs
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
+		return
 	}
 
 	form := userSignupForm{
@@ -535,10 +634,11 @@ func (app *application) signUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = app.authService.SignUp(auth.SignUpParam{Password: form.Password, Name: form.Name, Email: form.Email})
+
 	if err != nil {
 		data := app.newTemplateData(r)
 		data.Form = form
-		app.render(w, r, http.StatusInternalServerError, "signup.html", data)
+		app.render(w, r, http.StatusBadRequest, "signup.html", data)
 		return
 	}
 
@@ -570,6 +670,7 @@ func (app *application) upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+
 	p := struct {
 		FileName string `json:"fileName"`
 	}{
@@ -582,8 +683,11 @@ func (app *application) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(js)
-
+	_, err = w.Write(js)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 }
 
 func (app *application) userLogout(w http.ResponseWriter, r *http.Request) {
@@ -593,11 +697,7 @@ func (app *application) userLogout(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, r, err)
 		return
 	}
-
 	app.sessionManager.Remove(r.Context(), "currentUserID")
-
 	app.sessionManager.Put(r.Context(), "flash", "您已登出")
-
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-
 }

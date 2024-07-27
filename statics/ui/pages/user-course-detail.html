@@ -28,12 +28,14 @@
         <div>
             <a href="/users/{{.UserID}}/courses">👈返回我的課程列表</a>
         </div>
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-4">
             <h2 class="text-4xl">課程資訊</h2>
             <div class="w-full rounded-xl min-h-20 border-2 border-black p-4 relative">
+             
                 <a href="/users/{{.UserID}}/courses/{{.Course.ID}}/edit">
                     <button class="absolute right-4 top-4">編輯</button>
                 </a>
+    
                 <h3 class="text-3xl">{{.Course.Title}}</h3>
                 <div class="text-2xl">{{.Course.Instructor}}</div>
                 <div class="flex gap-2 mt-2">
@@ -44,9 +46,13 @@
                 <div class="mt-2">{{.Course.Description}}</div>
             </div>
         </div>
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-4">
             <h2 class="text-4xl">章節列表</h2>
-            <div class="w-full rounded-xl min-h-20 border-2 border-black overflow-hidden ">
+            <div>
+                <a href="/users/{{.UserID}}/courses/{{.Course.ID}}/chapters/create" class="cursor-pointer h-9 px-6 py-2 border-2 border-black rounded-xl bg-gray-200">新增章節</a>
+            </div>
+            {{ if .Course.Chapters }}
+            <div class="w-full rounded-xl  border-2 border-black overflow-hidden ">
                 <ul>
                     {{range .Course.Chapters}}
                     <li>
@@ -59,11 +65,13 @@
                             <div class="w-full">
                                 {{.Title}}
                             </div>
+                      
                             <div class="w-40 flex justify-end pr-4 gap-4">
-                                
-                                
                                 <a href="/users/{{$userID}}/courses/{{$course.ID}}/chapters/{{.ID}}/edit">編輯</a>
-                                <a>刪除</a>
+                                <form id="delete-chapter" action="/users/{{$userID}}/courses/{{$course.ID}}/chapters/{{.ID}}" method="post">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button >刪除</button>
+                                </form>
                             </div>
                          
                         </div>
@@ -71,6 +79,10 @@
                     {{end}}
                 </ul>
             </div>
+            {{else}}
+            <div class="w-full pl-4 py-4">此課程尚未有章節資訊，請新增章節。</div>
+
+            {{end}}
         </div>
     </div>
 

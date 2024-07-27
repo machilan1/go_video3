@@ -50,15 +50,15 @@
                     <div class="pl-4 pt-2">
                         <h2 class="text-2xl">{{.Course.Title}} - {{.Course.Instructor}}</h2>
                         <div class="flex items-center">
-                            {{if .Chapter.Link}} 
+                            {{if .Chapter.FileName}} 
                             <h3>第 {{.Chapter.ChapNum}} 章 <span class="ml-6">{{.Chapter.Title}}</span> - <span>{{.Chapter.Description}}</span></h3>
                             {{else}}
                             {{end}}
 
                         </div>
                     </div>
-                    {{if .Chapter.Link}}
-                    <video  src="{{.Chapter.Link}}" controls></video>
+                    {{if .Chapter.FileName}}
+                    <video  src="/statics/videos/{{.Chapter.FileName}}" controls></video>
                     {{else}}
                     <div class="pl-4">
                         {{if .Course.Chapters}}
@@ -92,7 +92,7 @@
                     <div class="h-9 flex items-center pl-4">
                         <h3>無章節資訊</h3>
                     </div>
-                    <video  src="{{.Course.Link}}" controls></video>
+                  
                 </div>
             </div>
             {{end}}

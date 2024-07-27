@@ -25,7 +25,7 @@ func (app *application) requireUpdater(next http.Handler) http.Handler {
 		}
 
 		if !app.sessionManager.GetBool(r.Context(), "canUpdate") {
-			app.clientError(w, http.StatusUnauthorized)
+			app.clientError(w, http.StatusForbidden)
 			return
 		}
 
@@ -53,7 +53,7 @@ func (app *application) changeMethod(next http.Handler) http.Handler {
 func (app *application) requireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !app.sessionManager.GetBool(r.Context(), "isAdmin") {
-			app.clientError(w, http.StatusUnauthorized)
+			app.clientError(w, http.StatusForbidden)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -69,13 +69,13 @@ func (app *application) requireAuthor(next http.Handler) http.Handler {
 
 		userID, err := strconv.Atoi(r.PathValue("userID"))
 		if err != nil {
-			app.serverError(w, r, err)
+			app.clientError(w, http.StatusBadRequest)
 			return
 		}
 		sessionUserID := app.sessionManager.GetInt(r.Context(), "currentUserID")
 
 		if userID != sessionUserID {
-			app.clientError(w, http.StatusUnauthorized)
+			app.clientError(w, http.StatusForbidden)
 			return
 		}
 

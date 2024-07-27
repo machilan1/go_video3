@@ -54,13 +54,6 @@ func (s *UserStore) Create(p CreateUserParam) error {
 
 }
 
-func (s *UserStore) FindOne(p FindOneUserParam) (User, error) {
-
-	var u User
-
-	return u, nil
-}
-
 func (s *UserStore) FindOneWithEmail(e string) (User, error) {
 
 	var u User

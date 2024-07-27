@@ -14,11 +14,11 @@ type templateData struct {
 	Form            any
 	Flash           string
 	UserID          int
+	CourseID        int
 	IsAuthenticated bool
 	CanUpdate       bool
 	IsAdmin         bool
 	CourseCards     []courseCardVM
-	ChapterCards    []chapterCardsVM
 	UserCards       []userCardVM
 	Course          CourseVM
 	Chapter         ChapterVM
@@ -72,13 +72,6 @@ func newTemplateCache() (map[string]*template.Template, error) {
 
 type courseCardVM struct {
 	store.Course
-}
-
-// TODO make sure you need this or not
-type chapterCardsVM struct {
-	title  string
-	length int
-	order  int
 }
 
 // TODO make sure you need this or not

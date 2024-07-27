@@ -29,7 +29,5 @@ func NewStore(DBUrl string) (*Store, error) {
 		ChapterStore: newChapterStore(db),
 		TagStore:     newTagStore(db),
 	}
-
 	return &s, nil
-
 }

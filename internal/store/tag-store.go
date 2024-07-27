@@ -18,7 +18,6 @@ func newTagStore(DB *sqlx.DB) *TagStore {
 		db: DB,
 	}
 	return &s
-
 }
 
 func (s *TagStore) FindTagsWithCourseID(ID int) ([]CourseTag, error) {

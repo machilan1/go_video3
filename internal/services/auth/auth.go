@@ -28,7 +28,6 @@ type SignUpParam struct {
 }
 
 func (as AuthService) SignUp(p SignUpParam) error {
-
 	hash, err := bcrypt.GenerateFromPassword([]byte(p.Password), 12)
 	if err != nil {
 		return err
@@ -43,14 +42,11 @@ func (as AuthService) SignUp(p SignUpParam) error {
 }
 
 func (as AuthService) Login(p LoginParam) (store.User, error) {
-
-	// find one by email
 	user, err := as.userStore.FindOneWithEmail(p.Email)
 	if err != nil {
 		return store.User{}, err
 	}
 
-	// check password
 	err = bcrypt.CompareHashAndPassword([]byte(*user.Password), []byte(p.Password))
 	if err != nil {
 		return store.User{}, err

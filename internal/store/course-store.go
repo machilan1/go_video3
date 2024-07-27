@@ -172,8 +172,7 @@ func (s *CourseStore) FindOne(ID int) (Course, error) {
 		c.created_at,
 		c.course_id,
 		v.id as "video_id",
-		v.file_name,
-		'/statics/videos/'||v.file_name as "link"
+		v.file_name
 	from chapter c
 	join video v on v.id = c.video_id 
 	where c.course_id = $1

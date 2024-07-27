@@ -1,64 +1,61 @@
 
 
+# Maya Video with Golang
+## Serving
 
-Serving
+### 1. Create .env  
 
-1. Create .env
-    Just copy the exact content in .envexample into .env
+Just copy the exact content in .envexample into .env
 
-
-2. Run docker-compose
+### 2. Run docker-compose  
 
     $ docker-compose up 
 
-3. Enter psql (if psql is available on your machine) 
+### 3. Enter psql (if psql is available on your machine)   
 
     $ make psql 
 
-4. Create tables and seeds through sql/schema.sql and sql/seed.sql manually.
+### 4. Create tables and seeds through sql/schema.sql and sql/seed.sql manually.
 
 
-5. To serve the app, run
-
+### 5. To serve the app
     $ make run
 
+## Notices
 
-Notices
+### 1. There are three users with different roles that you can login with. Password is literally "password"
 
-1. There are three users with different roles that you can login with.
-    teacher@gmail.com password (recommended login with this one)
-    student@gmail.com password
-    admin@gmail.com password
+teacher@gmail.com  (recommended login with this one)   
+student@gmail.com   
+admin@gmail.com  
 
 
-Developing
+## Developing
 
-1. Install Tailwind CSS
+### 1. Install Tailwind CSS
 
     $ make setup OS= <your os>
 
 
-2. Tailwind CSS has to recompile every time you change the templates.
+### 2. Tailwind CSS has to recompile every time you change the templates.
 
-    Open a new terminal and run
+Open a new terminal and run
 
     $ make tailwindcss-watch 
 
-    and the tailwindcss CLI will monitor the changes and recompile stylesheets automatically.
+and the tailwindcss CLI will monitor the changes and recompile stylesheets automatically.
 
 
-3. If you want to feel even better , you can use Air for hot reloading.
+### 3. If you want to feel even better , you can use Air for hot reloading.
     
-    Install air by the instructions in the url below
-    
-    https://github.com/air-verse/air
+Install air by the instructions in the url below
 
-    There is a .air.toml in project root and you can utilize the setting.
+https://github.com/air-verse/air
 
-    Run
+There is a .air.toml in project root and you can utilize the setting.
+
+Run
 
     $ air
 
-    to serve the app with hot reloading.
-
-    
+to serve the app with hot reloading.
