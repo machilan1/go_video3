@@ -55,7 +55,7 @@ func PermittedValue[T comparable](v T, permittedValues ...T) bool {
 }
 
 func IsEmail(v string) bool {
-	r, _ := regexp.Compile("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
+	r, _ := regexp.Compile(`^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`)
 	return r.Match([]byte(v))
 }
 

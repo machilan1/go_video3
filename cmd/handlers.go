@@ -268,14 +268,11 @@ func (app *application) editCourse(w http.ResponseWriter, r *http.Request) {
 	instructor := r.PostForm.Get("instructor")
 	description := r.PostForm.Get("description")
 
-	// update info
-	// 1 update tags
 	err = app.store.CourseStore.UpdateCourse(courseID, store.UpdateCourseBody{Title: title, Instructor: instructor, Tags: tagIds, Description: description})
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
-	// redirect to
 
 	app.sessionManager.Put(r.Context(), "flash", "已更新完成")
 	http.Redirect(w, r, r.URL.Path, http.StatusSeeOther)
@@ -362,7 +359,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		Password: r.PostForm.Get("password"),
 	}
 
-	form.CheckField(validators.IsEmail(form.Email), "email", "Invalid email eddress")
+	form.CheckField(validators.IsEmail(form.Email), "email", "Invalid email address")
 	form.CheckField(validators.NotBlank(form.Email), "email", "This field cannot be blank")
 	form.CheckField(validators.NotBlank(form.Password), "password", "This field cannot be blank")
 	form.CheckField(validators.MinChars(form.Password, 8), "password", "Invalid Password")

@@ -89,13 +89,16 @@ func (s *CourseStore) UpdateCourse(courseID int, b UpdateCourseBody) error {
 
 	for _, v := range b.Tags {
 		valuesPairs = append(valuesPairs, `(`+strconv.Itoa(v)+`,`+strconv.Itoa(courseID)+`)`)
+
 	}
 
 	valuesString := strings.Join(valuesPairs, ",")
 
-	_, err = tr.Exec("insert into course_tag (tag_id,course_id) values " + valuesString)
-	if err != nil {
-		return err
+	if valuesString != "" {
+		_, err = tr.Exec("insert into course_tag (tag_id,course_id) values " + valuesString)
+		if err != nil {
+			return err
+		}
 	}
 	//
 	interpolationIndex := 1
