@@ -76,10 +76,7 @@ type courseCardVM struct {
 
 // TODO make sure you need this or not
 type userCardVM struct {
-	email     string
-	name      string
-	updatable bool
-	isAdmin   bool
+	store.User
 }
 
 type CourseVM struct {

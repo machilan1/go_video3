@@ -242,7 +242,7 @@ func (s *CourseStore) FindMany(p FindCoursesParams) ([]Course, error) {
 	values := []any{}
 
 	if p.SearchText != "" {
-		whereConditions = append(whereConditions, `c.name like '%'||$$||'%'`)
+		whereConditions = append(whereConditions, `lower(c.name) like '%'||$$||'%'`)
 		values = append(values, p.SearchText)
 	}
 

@@ -1,0 +1,69 @@
+
+
+
+{{define "nav"}}
+
+
+{{end}}
+
+
+
+{{define "main"}}
+<div class="flex">
+    <nav class="bg-gray-200 w-48 rounded-tr-2xl rounded-br-2xl pt-24 h-screen">
+        <ul class="flex flex-col gap-2">
+            <li class="flex justify-center">
+                <a href="/admin/users">
+                    <button class="text-2xl">使用者列表</button>
+                </a>
+            </li>
+            <li class="flex justify-center">
+                <a href="/admin/courses">
+                    <button class="text-2xl">課程列表</button>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class=" flex items-center w-full h-screen p-8">
+        <div class="flex flex-col border-2 border-black rounded-xl w-full h-full">
+       
+            <div class="w-full">
+                <table class="w-full">
+                    <thead class="py-4 flex  text-2xl border-b-2 border-black w-full">
+                        <tr class="grid w-full grid-cols-7 px-4">
+                            <th class="flex justify-normal ">
+                                課程名稱
+                            </th>
+                            <th class="flex justify-normal">分類</th>
+                            <th class="flex justify-normal">上傳者</th>
+                            <th class="flex justify-normal">上傳時間</th>
+                            <th class="flex justify-normal">更新時間</th>
+                            <th class="flex justify-normal">狀態</th>
+                            <th class="flex justify-normal"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="grid w-full grid-cols-7 px-4 py-4 border-b-2 border-black">
+                            <td class="overflow-hidden">example@gmail.com</td>
+                            <td>golang,中文</td>
+                            <td>Rode Joseph</td>
+                            <td>2022/12/12 16:00</td>
+                            <td>2022/12/12 16:00</td>
+                            <td>上架中</td>
+                            <td class="flex justify-end"> 
+                                <a href="">
+                                    下架
+                                </a>
+                            </td>
+                        </tr>
+                      
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+{{end}}
+

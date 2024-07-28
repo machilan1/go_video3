@@ -4,7 +4,7 @@ create table app_user (
     email text not null unique,
     password text not null,
     created_at timestamptz not null default now(),
-    last_login timestamptz,
+    last_login_at timestamptz not null default now(),
     is_admin boolean not null default false,
     is_active boolean not null default true,
     can_update boolean not null default false

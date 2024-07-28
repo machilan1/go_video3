@@ -27,9 +27,9 @@ func (app *application) routes() http.Handler {
 	//Protected
 	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogout))
 	mux.Handle("POST /files/upload", protected.ThenFunc(app.upload))
-	mux.Handle("GET /{$}", dynamic.ThenFunc(app.viewHome))
+	mux.Handle("GET /{$}", protected.ThenFunc(app.viewHome))
 	// TODO : Develope this later
-	mux.Handle("GET /courses/search", dynamic.ThenFunc(app.searchCourse))
+	mux.Handle("GET /courses/search", protected.ThenFunc(app.searchCourse))
 	mux.Handle("GET /courses/{ID}", protected.ThenFunc(app.viewCourse))
 	mux.Handle("GET /courses/{courseID}/chapters/{chapterID}", protected.ThenFunc(app.viewChapter))
 
@@ -47,7 +47,7 @@ func (app *application) routes() http.Handler {
 	mux.Handle("GET /users/{userID}/courses/{courseID}/chapters/{chapterID}/edit", updater.ThenFunc(app.viewEditCourseChapter))
 
 	mux.Handle("GET /admin/users", admin.ThenFunc(app.viewAdminUsers))
-	// mux.Handle("GET /admin/courses", admin.ThenFunc(app.viewAdminCourses))
+	mux.Handle("GET /admin/courses", admin.ThenFunc(app.viewAdminCourses))
 	// mux.Handle("GET /user/signup", admin.ThenFunc(app.viewSignUp))
 	// mux.Handle("POST /user/signup", admin.ThenFunc(app.signUp))
 	// mux.Handle("PATCH /users/{userID}/change-role", admin.ThenFunc(app.changeUserRole))

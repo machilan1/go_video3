@@ -306,8 +306,39 @@ func (app *application) viewCreateChapter(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) viewAdminUsers(w http.ResponseWriter, r *http.Request) {
+	limit, err := app.parseQueryInt(r, "limit")
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+	}
+	page, err := app.parseQueryInt(r, "page")
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+	}
+
+	users, err := app.store.UserStore.FindMany(store.FindUsersParams{Limit: limit, Page: page})
+
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	fmt.Println(users)
+
+	userCards := []userCardVM{}
+	for _, v := range users {
+		userCards = append(userCards, userCardVM{v})
+	}
+
 	data := app.newTemplateData(r)
+	data.UserCards = userCards
 	app.render(w, r, http.StatusOK, "admin-users-list.html", data)
+}
+
+func (app *application) viewAdminCourses(w http.ResponseWriter, r *http.Request) {
+
+	data := app.newTemplateData(r)
+
+	app.render(w, r, http.StatusOK, "admin-course-list.html", data)
 }
 
 func (app *application) searchCourse(w http.ResponseWriter, r *http.Request) {

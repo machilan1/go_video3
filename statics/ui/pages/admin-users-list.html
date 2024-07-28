@@ -24,15 +24,49 @@
                 </li>
             </ul>
         </nav>
-        <div>
-            <div class="">
-                <div class="h-9 flex items-center">
-
+        <div class=" flex items-center w-full h-screen p-8">
+            <div class="flex flex-col border-2 border-black rounded-xl w-full h-full">
+           
+                <div class="w-full">
+                    <table class="w-full">
+                        <thead class="py-4 flex  text-2xl border-b-2 border-black w-full">
+                            <tr class="grid grid-cols-4 w-full px-4">
+                                <th class="flex justify-normal">使用者帳號</th>
+                                <th class="flex justify-normal">權限</th>
+                                <th class="flex justify-normal">上次登入時間</th>
+                                <th class="flex justify-end"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{ range .UserCards}}
+                            <tr class="grid grid-cols-4 w-full px-4  py-4 border-b-2 border-black">
+                                <td >{{.Email}}</td>
+                                <td>
+                                    {{if .IsAdmin}}
+                                    管理員
+                                    {{else}}
+                                        {{ if .CanUpdate}}
+                                        編輯者
+                                        {{else}}
+                                        一般使用者
+                                        {{end}}
+                                    {{end}}
+                                
+                                </td>
+                                <td>{{.LastLoginAt}}</td>
+                                <td class="flex justify-end">  
+                                    <a href="">
+                                        編輯
+                                    </a>
+                                </td>
+                            </tr>
+                            {{end}}
+                          
+                        </tbody>
+                    </table>
                 </div>
-
-
+                
             </div>
-        
         </div>
     </div>
 
